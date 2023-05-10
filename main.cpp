@@ -161,14 +161,20 @@ int main(int argc, char* argv[]){
 	money_game.SetColor(Text::BLACK_TEXT);
 	
 	Text text_menu[NUM_OF_MENU_OPTIONS];
-    text_menu[0].SetColor(Text::WHITE_TEXT);
-    text_menu[1].SetColor(Text::WHITE_TEXT);
-	text_menu[2].SetColor(Text::WHITE_TEXT);
 	bool is_selected[NUM_OF_MENU_OPTIONS] = { 0 };
 
 	bool is_playing = false;
     bool is_quit = false;
 	bool is_quit_menu = false;
+
+	// Set up menu options
+	const char* menu_option_text[NUM_OF_MENU_OPTIONS] = {"PLAY GAME", "EXIT", "HOW TO PLAY"};
+	for (int i = 0; i < NUM_OF_MENU_OPTIONS; i++)
+	{
+		text_menu[i].SetColor(Text::WHITE_TEXT);
+	}
+	
+
 	 // Menu game
     while (!is_quit_menu)
     {
@@ -177,26 +183,17 @@ int main(int argc, char* argv[]){
 
         g_start_menu.Render(g_screen, NULL); //fill ảnh vào màn
 
-        text_menu[0].SetText("PLAY GAME");
-        text_menu[0].LoadFromRenderText(font_2, g_screen);
-        text_menu[0].SetRect(350, 400);
-        text_menu[0].RenderText(g_screen, text_menu[0].GetRectFrame().x, text_menu[0].GetRectFrame().y);
-
-        text_menu[1].SetText("EXIT");
-        text_menu[1].LoadFromRenderText(font_2, g_screen);
-        text_menu[1].SetRect(200, 500);
-        text_menu[1].RenderText(g_screen, text_menu[1].GetRectFrame().x, text_menu[1].GetRectFrame().y);
-
-		text_menu[2].SetText("HOW TO PLAY");
-        text_menu[2].LoadFromRenderText(font_2, g_screen);
-        text_menu[2].SetRect(500, 500);
-        text_menu[2].RenderText(g_screen, text_menu[2].GetRectFrame().x, text_menu[2].GetRectFrame().y);
+		for (int i = 0; i < NUM_OF_MENU_OPTIONS; i++)
+		{
+			text_menu[i].SetText(menu_option_text[i]);
+			text_menu[i].LoadFromRenderText(font_2, g_screen);
+			text_menu[i].SetRect(200, 350 + i*100);
+			text_menu[i].RenderText(g_screen, text_menu[i].GetRectFrame().x, text_menu[i].GetRectFrame().y);
+		}
 
 		bool is_showing_msbox = false;
-		 while (SDL_PollEvent(&g_event) != 0)
-        {
-            switch (g_event.type)
-            {
+		 while (SDL_PollEvent(&g_event) != 0){
+            switch (g_event.type){
             case SDL_QUIT:
             {
                 is_quit_menu = true;
@@ -268,91 +265,90 @@ int main(int argc, char* argv[]){
                     is_quit = true;
                 }
             break;
+
             default:
-            break;
+				break;
 			}
         }
         SDL_RenderPresent(g_screen);
     }
 	
 	Mix_PlayMusic(bg_music, -1);
-	//set up game loop
+
+	// Set up game loop
 	ImpTimer fps_timer;
-	Uint32 menu_time = SDL_GetTicks()/1000;
-    while (!is_quit)
-    {
-		fps_timer.start();
-        while (SDL_PollEvent(&g_event) != 0)
-        {
-            if (g_event.type == SDL_QUIT){
-                is_quit = true;
-            }
-			character.HandleInputAction(g_event, g_screen);
-        }
-		   // clear screen
-		SDL_SetRenderDrawColor(g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
-		SDL_RenderClear(g_screen);
+	Uint32 menu_time = SDL_GetTicks() / 1000;
 
-		// render background
-		g_background.Render(g_screen, NULL);
+	while (!is_quit) {
+	  fps_timer.start();
 
-		// render game map
-		Map map_data = game_map.getMap();
-
-		character.SetMapXY(map_data.start_x_, map_data.start_y_);
-		character.DoPlayer(map_data);
-		character.Show(g_screen);
-
-	
-		game_map.SetMap(map_data);
-		game_map.DrawMap(g_screen);
-
-
-		// render player money
-		 player_money.Show(g_screen);
-		
-		// render game time
-		std::string str_time = "Time: ";
-		Uint32 time_val = SDL_GetTicks() / 1000;  //thời gian chơi
-		Uint32 val_time = 150 - time_val + menu_time;; //thời gian còn lại
-
-		if (val_time <= 0 || character.getY() > map_data.max_y_ || character.GetMoneyCount() < 0 ){
-			GameOver();
-		}
-		
-		else
-		{
-			std::string str_val = std::to_string (val_time);
-			str_time += str_val;
-
-			time_game.SetText(str_time);
-			time_game.LoadFromRenderText(font_1, g_screen);
-			time_game.RenderText(g_screen, SCREEN_WIDTH - 200, 30);
+	  // Handle events
+	  while (SDL_PollEvent(&g_event) != 0) {
+		if (g_event.type == SDL_QUIT) {
+		  is_quit = true;
 		}
 
-		// render player score
-		int money_count = character.GetMoneyCount();
-		std::string money_str = std::to_string(money_count);
+		character.HandleInputAction(g_event, g_screen);
+	  }
 
-		money_game.SetText(money_str);
-		money_game.LoadFromRenderText(font_1, g_screen);
-		money_game.RenderText(g_screen, 70, 30);
+	  // Clear screen
+	  SDL_SetRenderDrawColor(g_screen, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR, RENDER_DRAW_COLOR);
+	  SDL_RenderClear(g_screen);
 
-      // update screen
-		SDL_RenderPresent(g_screen);
+	  // Render background
+	  g_background.Render(g_screen, NULL);
 
-		// delay to maintain constant FPS
-		int real_imp_time = fps_timer.get_ticks();
-		int time_one_frame = 1000 / FRAME_PER_SECOND; // ms
+	  // Render game map
+	  Map map_data = game_map.getMap();
 
-		if (real_imp_time < time_one_frame){
-			int delay_time = time_one_frame - real_imp_time;
-			SDL_Delay(delay_time);
-		}
+	  character.SetMapXY(map_data.start_x_, map_data.start_y_);
+	  character.DoPlayer(map_data);
+	  character.Show(g_screen);
+
+	  game_map.SetMap(map_data);
+	  game_map.DrawMap(g_screen);
+
+	  // Render player money
+	  player_money.Show(g_screen);
+
+	  // Render game time
+	  std::string str_time = "Time: ";
+	  Uint32 time_val = SDL_GetTicks() / 1000;  // Game time
+	  Uint32 val_time = 150 - time_val + menu_time; // Remaining time
+
+	  if (val_time <= 0 || character.getY() > map_data.max_y_ || character.GetMoneyCount() < 0) {
+		GameOver();
+	  } else {
+		std::string str_val = std::to_string(val_time);
+		str_time += str_val;
+
+		time_game.SetText(str_time);
+		time_game.LoadFromRenderText(font_1, g_screen);
+		time_game.RenderText(g_screen, SCREEN_WIDTH - 200, 30);
+	  }
+
+	  // Render player score
+	  int money_count = character.GetMoneyCount();
+	  std::string money_str = std::to_string(money_count);
+
+	  money_game.SetText(money_str);
+	  money_game.LoadFromRenderText(font_1, g_screen);
+	  money_game.RenderText(g_screen, 70, 30);
+
+	  // Update screen
+	  SDL_RenderPresent(g_screen);
+
+	  // Delay to maintain constant FPS
+	  int real_imp_time = fps_timer.get_ticks();
+	  int time_one_frame = 1000 / FRAME_PER_SECOND; // ms
+
+	  if (real_imp_time < time_one_frame) {
+		int delay_time = time_one_frame - real_imp_time;
+		SDL_Delay(delay_time);
+	  }
 	}
 
-	// clean up and exit
+	// Clean up and exit
 	close();
-    return 0;
-
+	return 0;
 }
