@@ -1,4 +1,4 @@
-# THƯ VIỆN SDL VÀ CÁCH CÀI
+## THƯ VIỆN SDL VÀ CÁCH CÀI
 - Các thư viện SDL2 sử dụng : SDL.h, SDL_image.h, SDL_mixer.h, SDL_TTF.h
 - Hướng dẫn cài các thư viện SDL : Tham khảo trên trang web Lazyfoo https://lazyfoo.net/tutorials/SDL/01_hello_SDL/windows/codeblocks/index.php 
 # MÔ TẢ TRÒ CHƠI
