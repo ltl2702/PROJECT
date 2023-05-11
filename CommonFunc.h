@@ -44,7 +44,7 @@ const int SCREEN_HALF_HEIGHT = SCREEN_HEIGHT / 2;
 //thông số nhân vật
 #define GRAVITY_SPEED 0.8  
 #define MAX_FALL_SPEED 10 
-#define PLAYER_SPEED 9 
+#define PLAYER_SPEED 10 
 #define PLAYER_JUMP_VAL 19
 #define SPRITE_NUM 8
 
@@ -73,7 +73,7 @@ typedef struct Map{ //trạng thái, thông tin, vị trí của 1 ô map
     char* file_name_; 
 } Map;
 
-#define NUM_OF_MENU_OPTIONS 3
+#define NumMenu 3
 
 namespace CommonFunc
 {

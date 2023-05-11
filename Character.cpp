@@ -141,20 +141,18 @@ void Character::CheckToMap(Map& map_data){
 	int height_min = height_frame_ < TILE_SIZE ? height_frame_ : TILE_SIZE;
 	x1 = (x_pos_ + x_val_)/TILE_SIZE;   //ô hiện tại
 	x2 = (x_pos_ + x_val_ + width_frame_ - err)/TILE_SIZE;
-
+	//err là một giá trị sai số nhỏ (thường là 1) để tránh việc nhân vật và map kẹt vào nhau không xử lí đc va chạm
 	y1 = (y_pos_)/TILE_SIZE;
 	y2 = (y_pos_ + height_min - err)/TILE_SIZE;
 
 	 /*
-            (x1,y1)*****************(x2,y1)
-               *     *           *     *
-               *********** o ***********
-               *     *    \|/    *     *
-               *     *    / \    *     *
-               *     *           *     *
-               *     *           *     *
-               *     *           *     *
-            (x1,y2)*****************(x2,y2)
+            (x1,y1)**********(x2,y1)
+               *               *     
+               *               *     
+               *               *     
+               *               *     
+               *               *     
+            (x1,y2)*********(x2,y2)
     */
 
 if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y){
@@ -173,13 +171,11 @@ if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y){
             } else if (map_data.tile[y2][x2] == BOMB) {
                 map_data.tile[y2][x2] = EXPLOSION;
                 DecreaseMoney();
-            } else if (map_data.tile[y1][x2] == TREASURE || map_data.tile[y2][x2] == TREASURE) {
-                LoadWin();
             } else {
 			//cập nhật lại tọa độ x của nhân vật để đặt nó trở lại bên trong ô đó
                 x_pos_ = x2 * TILE_SIZE; //va chạm vào ô ko trống nên bị chặn lại
                 x_pos_ -= width_frame_ + err; 
-                x_val_ = 0; // không thể đi đc, khoảng thay đổi là 0
+                x_val_ = 0; 
             }
         }
 	}
@@ -199,8 +195,6 @@ if (x1 >= 0 && x2 < MAX_MAP_X && y1 >= 0 && y2 < MAX_MAP_Y){
             } else if (map_data.tile[y2][x1] == BOMB) {
                 map_data.tile[y2][x1] = EXPLOSION;
                 DecreaseMoney();
-            } else if (map_data.tile[y1][x1] == TREASURE || map_data.tile[y2][x1] == TREASURE) {
-                LoadWin();
             } else {
                 x_pos_ = (x1 + err) * TILE_SIZE;
                 x_val_ = 0; //không thể lùi đc
@@ -232,8 +226,6 @@ if (x1 >= 0 && x2 < MAX_MAP_X && y1 >=0 && y2 < MAX_MAP_Y){
             } else if (map_data.tile[y2][x2] == BOMB) {
                 map_data.tile[y2][x2] = EXPLOSION;
                 DecreaseMoney();
-            } else if (map_data.tile[y2][x2] == TREASURE || map_data.tile[y2][x1] == TREASURE) {
-                LoadWin();
             } else {
                 y_pos_ = y2 * TILE_SIZE;
                 y_pos_ -= height_frame_ + err;
@@ -257,8 +249,6 @@ if (x1 >= 0 && x2 < MAX_MAP_X && y1 >=0 && y2 < MAX_MAP_Y){
             } else if (map_data.tile[y1][x2] == BOMB) {
                 map_data.tile[y1][x2] = EXPLOSION;
                 DecreaseMoney();
-            } else if (map_data.tile[y1][x1] == TREASURE || map_data.tile[y1][x2] == TREASURE) {
-                LoadWin();
             } else {
                 y_pos_ = (y1 + err) * TILE_SIZE;
                 y_val_ = 0;
@@ -281,24 +271,10 @@ void Character::CenterEntityOnMap(Map& map_data){
 	//Set vị trí trục x: Nv đi theo chiều ngang
 	map_data.start_x_ = x_pos_ - SCREEN_HALF_WIDTH;
 	if (map_data.start_x_ < 0) map_data.start_x_ = 0;
-	else if (map_data.start_x_ + SCREEN_WIDTH > map_data.max_x_) 
+	else if (map_data.start_x_ + SCREEN_WIDTH >= map_data.max_x_) 
 		map_data.start_x_  = map_data.max_x_ - SCREEN_WIDTH;
-
-	//Set vị trí trục y: Nv đi theo chiều dọc
-	map_data.start_y_ = y_pos_ - SCREEN_HALF_HEIGHT;
-	if (map_data.start_y_ < 0) map_data.start_y_ = 0;
-	else if (map_data.start_y_ + SCREEN_HEIGHT > map_data.max_y_)
-		map_data.start_y_  = map_data.max_y_ - SCREEN_HEIGHT;
 }
 
-void Character::LoadWin()
-{
-	Mix_HaltMusic();
-	win = Mix_LoadWAV("music//win.wav");
-	Mix_PlayChannel(-1,win , 0);
-	MessageBoxA(NULL, "YOU WON!", "Congratulations", MB_OK);
-	Free();
-}
 void Character::IncreaseMoney() {
     money_count++;
     Mix_PlayChannelTimed(-1, Mix_LoadWAV("music//money.wav"), 0, 1000);

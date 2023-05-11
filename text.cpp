@@ -9,9 +9,11 @@ Text::Text(){
 	texture_ = NULL;
 }
 
-Text::~Text(){}
+Text::~Text(){
+}
 
 bool Text::LoadFromRenderText(TTF_Font* font, SDL_Renderer* screen){
+	Free();
 	//Tạo một surface từ chuỗi văn bản str_val_ sử dụng font và màu sắc text_color
 	SDL_Surface* text_surface = TTF_RenderText_Solid(font, str_val_.c_str(),text_color_);
 	if (text_surface){
@@ -24,7 +26,7 @@ bool Text::LoadFromRenderText(TTF_Font* font, SDL_Renderer* screen){
 }
 
 void Text::Free(){
-	if(texture_=NULL){
+	if(texture_ !=NULL){
 		SDL_DestroyTexture(texture_);
 		texture_ = NULL;
 	}
